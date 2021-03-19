@@ -6,7 +6,7 @@
 #include <string>
 using namespace std;
 
-class SyntaxAnalyzer{
+class SyntaxAnalyzer {
     private:
         vector<string> lexemes;
         vector<string> tokens;
@@ -104,7 +104,7 @@ bool SyntaxAnalyzer::vdec() {
 
     if (tokitr!=tokens.end() && *tokitr != "t_var")
         return true;
-    else{
+    else {
         tokitr++; lexitr++;
         int result = 0;   // 0 - valid, 1 - done, 2 - error
         result = vars();
@@ -136,20 +136,20 @@ int SyntaxAnalyzer::vars() {
     else
         return 1;
     bool semihit = false;
-    while (tokitr != tokens.end() && result == 0 && !semihit){
-        if (*tokitr == "t_id"){
+    while (tokitr != tokens.end() && result == 0 && !semihit) {
+        if (*tokitr == "t_id") {
             tokitr++; lexitr++;
-            if (tokitr != tokens.end() && *tokitr == "s_comma"){
+            if (tokitr != tokens.end() && *tokitr == "s_comma") {
                 tokitr++; lexitr++;
             }
-            else if (tokitr != tokens.end() && *tokitr == "s_semi"){
+            else if (tokitr != tokens.end() && *tokitr == "s_semi") {
                 semihit = true;
                 tokitr++; lexitr++;
             }
             else
                 result = 2;
         }
-        else{
+        else {
             result = 2;
         }
     }
@@ -167,29 +167,29 @@ bool SyntaxAnalyzer::stmtlist() {
     else
         return true;
 }
-int SyntaxAnalyzer::stmt(){  // returns 1 or 2 if valid, 0 if invalid
-	if (*tokitr == "t_if"){
+int SyntaxAnalyzer::stmt() {  // returns 1 or 2 if valid, 0 if invalid
+	if (*tokitr == "t_if") {
         tokitr++; lexitr++;
         if (ifstmt()) return 1;
         else return 0;
     }
-    else if (*tokitr == "t_while"){
+    else if (*tokitr == "t_while") {
         tokitr++; lexitr++;
         if (whilestmt()) return 1;
         else return 0;
     }
-    else if (*tokitr == "t_id"){  // assignment starts with identifier
+    else if (*tokitr == "t_id") {  // assignment starts with identifier
         tokitr++; lexitr++;
         cout << "t_id" << endl;
         if (assignstmt()) return 1;
         else return 0;
     }
-    else if (*tokitr == "t_input"){
+    else if (*tokitr == "t_input") {
         tokitr++; lexitr++;
         if (inputstmt()) return 1;
         else return 0;
     }
-    else if (*tokitr == "t_output"){
+    else if (*tokitr == "t_output") {
         tokitr++; lexitr++;
         cout << "t_output" << endl;
         if (outputstmt()) return 1;
@@ -198,13 +198,45 @@ int SyntaxAnalyzer::stmt(){  // returns 1 or 2 if valid, 0 if invalid
     return 2;  //stmtlist can be null
 }
 
-bool SyntaxAnalyzer::ifstmt(){
+bool SyntaxAnalyzer::ifstmt() {
+	if (tokitr == tokens.end() || *tokitr != "s_lparen")
+		return false;
+	tokitr++; lexitr; // lparen is found, so we increment the iterators
+	if ( !expr() )
+		return false;
+	if ( tokitr == tokens.end() )
+		return false;
+	if ( *tokitr != "s_rparen" )
+		return false;
+	tokitr++; lexitr; // rparen is found, so we increment the iterators
+	if ( tokitr == tokens.end() )
+		return false;
+
+	if ( *tokitr != "t_then" )
+		return false;
+	tokitr++; lexitr++;
+	if ( !stmtlist() )
+		return false;
+	if ( !elsepart() )
+		return false;
+	if ( *tokitr != "t_then" )
+		tokitr++; lexitr++;
+	if ( !stmtlist() )
+		return false;
+	if ( !elsepart() )
+		return false;
+	if ( *tokitr == tokens.end() )
+		return false;
+	tokitr++; lexitr++;
+	if (*tokitr != "t_if")
+		return false;
+	tokitr++; lexitr++;
+
 	return true;
-    // we will write this together in class
 }
 
-bool SyntaxAnalyzer::elsepart(){
-    if (*tokitr == "t_else"){
+bool SyntaxAnalyzer::elsepart() {
+    if (*tokitr == "t_else") {
         tokitr++; lexitr++;
         if (stmtlist())
             return true;
@@ -214,21 +246,29 @@ bool SyntaxAnalyzer::elsepart(){
     return true;   // elsepart can be null
 }
 
-bool SyntaxAnalyzer::whilestmt(){
+bool SyntaxAnalyzer::whilestmt() {
+	if ( tokitr == tokens.end() || *tokitr != "s_lparen")
+		return false;
+	tokitr++; lexitr++;
+	if ( !expr() )
+		return false;
+
+
 	return true;
 	// write this function
 }
 
-bool SyntaxAnalyzer::assignstmt(){
+bool SyntaxAnalyzer::assignstmt() {
 	return true;
     // write this function
 }
-bool SyntaxAnalyzer::inputstmt(){
+
+bool SyntaxAnalyzer::inputstmt() {
     if (*tokitr == "s_lparen"){
         tokitr++; lexitr++;
         if (*tokitr == "t_id"){
             tokitr++; lexitr++;
-            if (*tokitr == "s_rparen"){
+            if (*tokitr == "s_rparen") {
                 tokitr++; lexitr++;
                 return true;
             }
@@ -237,15 +277,15 @@ bool SyntaxAnalyzer::inputstmt(){
     return false;
 }
 
-bool SyntaxAnalyzer::outputstmt(){
+bool SyntaxAnalyzer::outputstmt() {
 	return true;
 	// write this function
 }
 
-bool SyntaxAnalyzer::expr(){
-    if (simpleexpr()){
-	if (logicop()){
-		if (simpleexpr())
+bool SyntaxAnalyzer::expr() {
+    if ( simpleexpr() ) {
+	if ( logicop() ) {
+		if ( simpleexpr() )
 			return true;
 		else
 			return false;
@@ -253,17 +293,17 @@ bool SyntaxAnalyzer::expr(){
 	else
 		return true;
     }
-    else{
-	return false;
+    else {
+    	return false;
     }
 }
 
-bool SyntaxAnalyzer::simpleexpr(){
+bool SyntaxAnalyzer::simpleexpr() {
 	return true;
     // write this function
 }
 
-bool SyntaxAnalyzer::term(){
+bool SyntaxAnalyzer::term() {
     if ((*tokitr == "t_int")
 	|| (*tokitr == "t_str")
 	|| (*tokitr == "t_id")){
@@ -271,10 +311,10 @@ bool SyntaxAnalyzer::term(){
     	return true;
     }
     else
-        if (*tokitr == "s_lparen"){
+        if (*tokitr == "s_lparen") {
             tokitr++; lexitr++;
             if (expr())
-                if (*tokitr == "s_rparen"){
+                if (*tokitr == "s_rparen") {
                     tokitr++; lexitr++;
                     return true;
                 }
@@ -282,8 +322,8 @@ bool SyntaxAnalyzer::term(){
     return false;
 }
 
-bool SyntaxAnalyzer::logicop(){
-    if ((*tokitr == "s_and") || (*tokitr == "s_or")){
+bool SyntaxAnalyzer::logicop() {
+    if ((*tokitr == "s_and") || (*tokitr == "s_or")) {
         tokitr++; lexitr++;
         return true;
     }
@@ -291,9 +331,9 @@ bool SyntaxAnalyzer::logicop(){
         return false;
 }
 
-bool SyntaxAnalyzer::arithop(){
+bool SyntaxAnalyzer::arithop() {
     if ((*tokitr == "s_mult") || (*tokitr == "s_plus") || (*tokitr == "s_minus")
-        || (*tokitr == "s_div")	|| (*tokitr == "s_mod")){
+        || (*tokitr == "s_div")	|| (*tokitr == "s_mod")) {
         tokitr++; lexitr++;
         return true;
     }
@@ -301,9 +341,9 @@ bool SyntaxAnalyzer::arithop(){
         return false;
 }
 
-bool SyntaxAnalyzer::relop(){
+bool SyntaxAnalyzer::relop() {
     if ((*tokitr == "s_lt") || (*tokitr == "s_gt") || (*tokitr == "s_ge")
-        || (*tokitr == "s_eq") || (*tokitr == "s_ne") || (*tokitr == "s_le")){
+        || (*tokitr == "s_eq") || (*tokitr == "s_ne") || (*tokitr == "s_le")) {
         tokitr++; lexitr++;
         return true;
     }
@@ -328,9 +368,9 @@ std::istream& SyntaxAnalyzer::getline_safe(std::istream& input, std::string& out
     return input;
 }
 
-int main(){
+int main() {
     ifstream infile("codelexemes.txt");
-    if (!infile){
+    if (!infile) {
     	cout << "error opening codelexemes.txt file" << endl;
         exit(-1);
     }

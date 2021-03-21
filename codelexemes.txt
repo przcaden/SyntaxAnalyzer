@@ -9,10 +9,13 @@ t_id:x
 s_rparen:)
 t_if:if
 s_lparen:(
-s_lparen:(
-t_int:5
-s_plus:+
+t_id:x
+s_eq:==
 t_int:7
 s_rparen:)
-s_rparen:)
+t_then:then
+t_id:x
+s_assign:=
+t_integer:5
+s_semi:;
 t_end:end

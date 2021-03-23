@@ -67,7 +67,7 @@ bool SyntaxAnalyzer::parse() {
         if (tokitr!=tokens.end() && *tokitr=="t_main") {
             tokitr++; lexitr++;
             if ( tokitr!=tokens.end() && stmtlist() ) {
-            	if ( tokitr!=tokens.end() ) // should be at end token
+            	if ( tokitr!=tokens.end() )  // should be at end token
                 	if (*tokitr == "t_end") {
                 		tokitr++; lexitr++;
                 		if ( tokitr==tokens.end() ) {  // end was last thing in file
@@ -80,7 +80,7 @@ bool SyntaxAnalyzer::parse() {
                 	}
                 	else {
                 		cout << "invalid statement ending code" << endl;
-                }
+                	}
                 else {
                 	cout << "no end" << endl;
                 }
@@ -97,7 +97,6 @@ bool SyntaxAnalyzer::parse() {
     	cout << "bad var list" << endl;
     }
     return false;
-
 }
 
 bool SyntaxAnalyzer::vdec() {
@@ -210,27 +209,27 @@ bool SyntaxAnalyzer::ifstmt() {
 	tokitr++; lexitr++; // rparen is found, so we increment the iterators
 	if ( tokitr == tokens.end() )
 		return false;
-
+	cout << "in ifstmt " << *lexitr << endl;
 	if ( *tokitr != "t_then" )
 		return false;
 	tokitr++; lexitr++;
-	if ( !stmtlist() )
+	if ( !stmtlist() ) // stmtlist increments the iterators, so no need to here
 		return false;
+	cout << "in ifstmt stmtlist" << endl;
 	if ( !elsepart() )
 		return false;
-	if ( *tokitr != "t_then" )
-		return false;
-	tokitr++; lexitr++;
-	cout << "in ifstmt " << *tokitr << ":" << *lexitr << endl;
-	if ( !stmtlist() )
-		return false;
-	if ( !elsepart() )
-		return false;
+	cout << "in ifstmt elsepart " << *lexitr << endl;
 	if ( tokitr == tokens.end() )
 		return false;
+	cout << "in ifstmt before end " << *tokitr << endl;
+	if (*tokitr != "t_end")
+		return false;
 	tokitr++; lexitr++;
+	if ( tokitr == tokens.end() )
+		return false;
 	if (*tokitr != "t_if")
 		return false;
+	cout << "in if stmt endif" << endl;
 	tokitr++; lexitr++;
 
 	return true; // returns true if all other statements are false
@@ -256,21 +255,27 @@ bool SyntaxAnalyzer::whilestmt() {
 		return false;
 	if ( tokitr == tokens.end() )
 		return false;
-	tokitr++; lexitr++;
+	cout << "in whilestmt expr... " << *lexitr << endl;
 	if (*tokitr != "s_rparen")
 		return false;
+	tokitr++; lexitr++;
+	if ( tokitr == tokens.end() )
+		return false;
+	cout << "in whilestmt before loop" << endl;
 	if (*tokitr != "t_loop")
 		return false;
 	tokitr++; lexitr++;
 	if ( tokitr == tokens.end() )
 		return false;
+	cout << "in whilestmt stmtlist " << *lexitr << endl;
 	if ( !stmtlist() )
 		return false;
+	if (tokitr == tokens.end() || *tokitr != "t_end")
+		return false;
 	tokitr++; lexitr++;
-	if (*tokitr != "t_end")
+	if (tokitr == tokens.end() || *tokitr != "t_loop")
 		return false;
-	if (*tokitr != "t_loop")
-		return false;
+	tokitr++; lexitr++;
 
 	return true; // returns true if all other statements are false
 }
@@ -279,9 +284,15 @@ bool SyntaxAnalyzer::whilestmt() {
 bool SyntaxAnalyzer::assignstmt() {
 	if ( tokitr == tokens.end() || *tokitr != "s_assign")
 		return false;
+	cout << "in assignstmt =" << endl;
 	tokitr++; lexitr++;
-	if (*lexitr !=  "s_semi")
+	if ( !expr() )
 		return false;
+	tokitr++; lexitr++;
+	cout << "in assignstmt expr " << *lexitr << endl;
+	//if (*lexitr !=  "s_semi")
+	//	return false;
+	cout << "in assignstmt semi" << endl;
 
 	return true; // returns true if assignstmt contains assign operator and semicolon
 }
@@ -337,12 +348,12 @@ bool SyntaxAnalyzer::simpleexpr() {
 		return false;
 	if ( tokitr == tokens.end() )
 		return false;
-	if ( !arithop() && !relop() )
-		return false;
-	if ( tokitr == tokens.end() )
-		return false;
-	if ( !term() )
-		return false;
+	cout << "in simpleexpr term" << endl;
+
+	// [ARITHOP TERM | RELOP TERM]
+	if ( arithop() || relop() )
+		if ( !term() )
+			return false;
 
 	return true;
 }

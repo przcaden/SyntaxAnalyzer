@@ -79,7 +79,7 @@ bool SyntaxAnalyzer::parse() {
                 		}
                 	}
                 	else {
-                		cout << "invalid statement ending code" << endl;
+                		cout << "invalid statement ending code " << *lexitr << endl;
                 	}
                 else {
                 	cout << "no end" << endl;
@@ -94,7 +94,7 @@ bool SyntaxAnalyzer::parse() {
         }
     }
     else {
-    	cout << "bad var list" << endl;
+    	cout << "bad var list: " << *lexitr << endl;
     }
     return false;
 }
@@ -316,13 +316,15 @@ bool SyntaxAnalyzer::outputstmt() { // checks if output contains an expression o
 	if (tokitr == tokens.end() || *tokitr != "s_lparen")
 		return false;
 	tokitr++; lexitr++;
-	if (!expr() || *tokitr != "t_string")
+	if (!expr() && *tokitr != "t_string")
 		return false;
+	cout << "at output expr: " << *lexitr << endl;
 	if ( tokitr == tokens.end() )
 		return false;
 	if (*tokitr != "s_rparen")
 		return false;
-
+	tokitr++; lexitr++;
+	cout << "at end of outputstmt" << endl;
 	return true;
 }
 // ~ Caden Perez
@@ -348,7 +350,7 @@ bool SyntaxAnalyzer::simpleexpr() {
 		return false;
 	if ( tokitr == tokens.end() )
 		return false;
-	cout << "in simpleexpr term" << endl;
+	cout << "in simpleexpr term: " << *lexitr << endl;
 
 	// [ARITHOP TERM | RELOP TERM]
 	if ( arithop() || relop() )

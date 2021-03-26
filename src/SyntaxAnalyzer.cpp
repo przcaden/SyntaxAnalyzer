@@ -79,14 +79,14 @@ bool SyntaxAnalyzer::parse() {
                 		}
                 	}
                 	else {
-                		cout << "invalid statement ending code " << *lexitr << endl;
+                		cout << "invalid statement ending code" << endl;
                 	}
                 else {
                 	cout << "no end" << endl;
                 }
             }
             else {
-            	cout << *tokitr << ":" << *lexitr << " bad/no stmtlist" << endl;
+            	cout << "bad/no stmtlist" << endl;
             }
         }
         else {
@@ -158,13 +158,14 @@ bool SyntaxAnalyzer::stmtlist() {
     int result = stmt();
 
     while (result == 1) {
-    	result = stmt(); // [FIX] stmt() does not run yet!!!!
+    	result = stmt();
     }
     if (result == 0)
         return false;
     else
         return true;
 }
+
 int SyntaxAnalyzer::stmt() {  // returns 1 or 2 if valid, 0 if invalid
 	if (*tokitr == "t_if") {
         tokitr++; lexitr++;
@@ -209,19 +210,15 @@ bool SyntaxAnalyzer::ifstmt() {
 	tokitr++; lexitr++; // rparen is found, so we increment the iterators
 	if ( tokitr == tokens.end() )
 		return false;
-	cout << "in ifstmt " << *lexitr << endl;
 	if ( *tokitr != "t_then" )
 		return false;
 	tokitr++; lexitr++;
 	if ( !stmtlist() ) // stmtlist increments the iterators, so no need to here
 		return false;
-	cout << "in ifstmt stmtlist" << endl;
 	if ( !elsepart() )
 		return false;
-	cout << "in ifstmt elsepart " << *lexitr << endl;
 	if ( tokitr == tokens.end() )
 		return false;
-	cout << "in ifstmt before end " << *tokitr << endl;
 	if (*tokitr != "t_end")
 		return false;
 	tokitr++; lexitr++;
@@ -229,12 +226,13 @@ bool SyntaxAnalyzer::ifstmt() {
 		return false;
 	if (*tokitr != "t_if")
 		return false;
-	cout << "in if stmt endif" << endl;
 	tokitr++; lexitr++;
 
 	return true; // returns true if all other statements are false
 }
 // ~ Caden Perez & St. Clair
+// pre: if token is found in the vector and this method is ran
+// post: returns true if all ifstmt conditions are met, false if any are not
 
 bool SyntaxAnalyzer::elsepart() {
     if (*tokitr == "t_else") {
@@ -255,19 +253,16 @@ bool SyntaxAnalyzer::whilestmt() {
 		return false;
 	if ( tokitr == tokens.end() )
 		return false;
-	cout << "in whilestmt expr... " << *lexitr << endl;
 	if (*tokitr != "s_rparen")
 		return false;
-	tokitr++; lexitr++;
+	tokitr++; lexitr++; // increment iterators whenever checked for a token
 	if ( tokitr == tokens.end() )
 		return false;
-	cout << "in whilestmt before loop" << endl;
 	if (*tokitr != "t_loop")
 		return false;
 	tokitr++; lexitr++;
 	if ( tokitr == tokens.end() )
 		return false;
-	cout << "in whilestmt stmtlist " << *lexitr << endl;
 	if ( !stmtlist() )
 		return false;
 	if (tokitr == tokens.end() || *tokitr != "t_end")
@@ -277,26 +272,26 @@ bool SyntaxAnalyzer::whilestmt() {
 		return false;
 	tokitr++; lexitr++;
 
-	return true; // returns true if all other statements are false
+	return true;
 }
 // ~ Caden Perez
+// pre: while token is found in the vector and this method is ran
+// post: returns true if all whilestmt conditions are met, false if any are not
 
 bool SyntaxAnalyzer::assignstmt() {
 	if ( tokitr == tokens.end() || *tokitr != "s_assign")
 		return false;
-	cout << "in assignstmt =" << endl;
 	tokitr++; lexitr++;
 	if ( !expr() )
 		return false;
 	tokitr++; lexitr++;
-	cout << "in assignstmt expr " << *lexitr << endl;
-	//if (*lexitr !=  "s_semi")
-	//	return false;
-	cout << "in assignstmt semi" << endl;
+	// the expr() method checks for a semicolon, so no need here
 
-	return true; // returns true if assignstmt contains assign operator and semicolon
+	return true;
 }
 // ~ Caden Perez
+// pre: assign token is found in the vector and this method is ran
+// post: returns true if all assignstmt conditions are met, false if any are not
 
 bool SyntaxAnalyzer::inputstmt() {
     if (*tokitr == "s_lparen"){
@@ -318,16 +313,16 @@ bool SyntaxAnalyzer::outputstmt() { // checks if output contains an expression o
 	tokitr++; lexitr++;
 	if (!expr() && *tokitr != "t_string")
 		return false;
-	cout << "at output expr: " << *lexitr << endl;
 	if ( tokitr == tokens.end() )
 		return false;
 	if (*tokitr != "s_rparen")
 		return false;
 	tokitr++; lexitr++;
-	cout << "at end of outputstmt" << endl;
 	return true;
 }
 // ~ Caden Perez
+// pre: output token is found in the vector and this method is ran
+// post: returns true if all outputstmt conditions are met, false if any are not
 
 bool SyntaxAnalyzer::expr() {
     if ( simpleexpr() ) {
@@ -350,9 +345,8 @@ bool SyntaxAnalyzer::simpleexpr() {
 		return false;
 	if ( tokitr == tokens.end() )
 		return false;
-	cout << "in simpleexpr term: " << *lexitr << endl;
 
-	// [ARITHOP TERM | RELOP TERM]
+//	   [ARITHOP TERM | RELOP TERM]
 	if ( arithop() || relop() )
 		if ( !term() )
 			return false;
@@ -360,6 +354,10 @@ bool SyntaxAnalyzer::simpleexpr() {
 	return true;
 }
 // ~ Caden Perez
+// pre: expr is ran before call of this method
+// post: returns true if just a term is found or if a term is found after
+// an arithmetic or relation operator. returns false if no term is found
+// or if there is no term after an operator.
 
 bool SyntaxAnalyzer::term() {
     if ((*tokitr == "t_int")

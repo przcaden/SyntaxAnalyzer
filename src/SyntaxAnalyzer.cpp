@@ -106,7 +106,7 @@ bool SyntaxAnalyzer::vdec() {
         tokitr++; lexitr++;
         int result = 0;   // 0 - valid, 1 - done, 2 - error
         result = vars();
-        if (result == 2)
+        if (result == 1 || result == 2)
             return false;
         while (result == 0) {
             if (tokitr!=tokens.end())
@@ -132,7 +132,7 @@ int SyntaxAnalyzer::vars() {
         tokitr++; lexitr++;
     }
     else
-        return 1;
+        return 2;
     bool semihit = false;
     while (tokitr != tokens.end() && result == 0 && !semihit) {
         if (*tokitr == "t_id") {
@@ -271,6 +271,7 @@ bool SyntaxAnalyzer::whilestmt() {
 	if (tokitr == tokens.end() || *tokitr != "t_loop")
 		return false;
 	tokitr++; lexitr++;
+	cout << "end of whilestmt" << endl;
 
 	return true;
 }
@@ -312,8 +313,6 @@ bool SyntaxAnalyzer::outputstmt() { // checks if output contains an expression o
 		return false;
 	tokitr++; lexitr++;
 	if (!expr() && *tokitr != "t_string")
-		return false;
-	if ( tokitr == tokens.end() )
 		return false;
 	if (*tokitr != "s_rparen")
 		return false;

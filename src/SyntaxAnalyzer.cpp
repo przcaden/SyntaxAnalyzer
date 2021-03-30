@@ -94,26 +94,27 @@ bool SyntaxAnalyzer::parse() {
         }
     }
     else {
-    	cout << "bad var list: " << *lexitr << endl;
+    	cout << "bad var list" << endl;
     }
     return false;
 }
 
 bool SyntaxAnalyzer::vdec() {
-    if (tokitr!=tokens.end() && *tokitr != "t_var")
+    if (tokitr==tokens.end() || *tokitr != "t_var")
         return true;
     else {
         tokitr++; lexitr++;
         int result = 0;   // 0 - valid, 1 - done, 2 - error
         result = vars();
+        // The following was changed: the vdec method only checked for result 1, but now checks for both.
+        // Before, it did not account for an empty set, but now it will.
         if (result == 1 || result == 2)
             return false;
         while (result == 0) {
             if (tokitr!=tokens.end())
                 result = vars(); // parse vars
         }
-
-        if (result == 1)
+        if (result == 1 || result == 2)
             return true;
         else
             return false;
@@ -227,7 +228,6 @@ bool SyntaxAnalyzer::ifstmt() {
 	if (*tokitr != "t_if")
 		return false;
 	tokitr++; lexitr++;
-
 	return true; // returns true if all other statements are false
 }
 // ~ Caden Perez & St. Clair
@@ -237,10 +237,9 @@ bool SyntaxAnalyzer::ifstmt() {
 bool SyntaxAnalyzer::elsepart() {
     if (*tokitr == "t_else") {
         tokitr++; lexitr++;
-        if (stmtlist())
-            return true;
-        else
-            return false;
+        // The following if statement now checks for the end of the token vector.
+        if ( tokitr == tokens.end() || !stmtlist() )
+        	return false;
     }
     return true;   // elsepart can be null
 }
@@ -271,7 +270,6 @@ bool SyntaxAnalyzer::whilestmt() {
 	if (tokitr == tokens.end() || *tokitr != "t_loop")
 		return false;
 	tokitr++; lexitr++;
-	cout << "end of whilestmt" << endl;
 
 	return true;
 }
@@ -309,15 +307,21 @@ bool SyntaxAnalyzer::inputstmt() {
 }
 
 bool SyntaxAnalyzer::outputstmt() { // checks if output contains an expression or string
-	if (tokitr == tokens.end() || *tokitr != "s_lparen")
-		return false;
-	tokitr++; lexitr++;
-	if (!expr() && *tokitr != "t_string")
-		return false;
-	if (*tokitr != "s_rparen")
-		return false;
-	tokitr++; lexitr++;
-	return true;
+	if (tokitr != tokens.end() && *tokitr == "s_lparen") {
+		tokitr++; lexitr++;
+		if ( tokitr == tokens.end() )
+			return false;
+		if (*tokitr == "t_string") {
+			tokitr++; lexitr++;
+		}
+		else if ( !expr() )
+			return false;
+		if (*tokitr == "s_rparen") {
+			tokitr++; lexitr++;
+			return true;
+		}
+	}
+	else return false;
 }
 // ~ Caden Perez
 // pre: output token is found in the vector and this method is ran

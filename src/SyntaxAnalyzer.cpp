@@ -106,7 +106,7 @@ bool SyntaxAnalyzer::vdec() {
         tokitr++; lexitr++;
         int result = 0;   // 0 - valid, 1 - done, 2 - error
         result = vars();
-        // The following was changed: the vdec method only checked for result 1, but now checks for both.
+        // The following was changed: the vdec method only checked for a result of 1, but now checks for both.
         // Before, it did not account for an empty set, but now it will.
         if (result == 1 || result == 2)
             return false;
@@ -232,7 +232,7 @@ bool SyntaxAnalyzer::ifstmt() {
 }
 // ~ Caden Perez & St. Clair
 // pre: if token is found in the vector and this method is ran
-// post: returns true if all ifstmt conditions are met, false if any are not
+// post: returns true if all ifstmt syntax conditions are met, false if any are not
 
 bool SyntaxAnalyzer::elsepart() {
     if (*tokitr == "t_else") {
@@ -254,7 +254,7 @@ bool SyntaxAnalyzer::whilestmt() {
 		return false;
 	if (*tokitr != "s_rparen")
 		return false;
-	tokitr++; lexitr++; // increment iterators whenever checked for a token
+	tokitr++; lexitr++;
 	if ( tokitr == tokens.end() )
 		return false;
 	if (*tokitr != "t_loop")
@@ -275,7 +275,7 @@ bool SyntaxAnalyzer::whilestmt() {
 }
 // ~ Caden Perez
 // pre: while token is found in the vector and this method is ran
-// post: returns true if all whilestmt conditions are met, false if any are not
+// post: returns true if all whilestmt syntax conditions are met, false if any are not
 
 bool SyntaxAnalyzer::assignstmt() {
 	if ( tokitr == tokens.end() || *tokitr != "s_assign")
@@ -290,7 +290,7 @@ bool SyntaxAnalyzer::assignstmt() {
 }
 // ~ Caden Perez
 // pre: assign token is found in the vector and this method is ran
-// post: returns true if all assignstmt conditions are met, false if any are not
+// post: returns true if all assignstmt syntax conditions are met, false if any are not
 
 bool SyntaxAnalyzer::inputstmt() {
     if (*tokitr == "s_lparen"){
@@ -325,7 +325,7 @@ bool SyntaxAnalyzer::outputstmt() { // checks if output contains an expression o
 }
 // ~ Caden Perez
 // pre: output token is found in the vector and this method is ran
-// post: returns true if all outputstmt conditions are met, false if any are not
+// post: returns true if all outputstmt syntax conditions are met, false if any are not
 
 bool SyntaxAnalyzer::expr() {
     if ( simpleexpr() ) {
